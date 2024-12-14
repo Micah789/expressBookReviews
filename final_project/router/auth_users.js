@@ -5,11 +5,18 @@ const regd_users = express.Router();
 
 let users = [];
 
-const isValid = (username) => { //returns boolean
-    let userswithsamename = users.filter((user) => {
-        return user.username === username;
-    });
-    return userswithsamename.length > 0 ? true : false;
+const isValid = (username) => {
+    // check if users array is not empty 
+    if (users.length > 0) {
+        let userswithsamename = users.filter((user) => {
+            return user.username === username;
+        });
+
+        return userswithsamename.length > 0 ? false : true;
+    }
+
+    // the username is unique and allowed to register 
+    return true;
 }
 
 const authenticatedUser = (username, password) => {
@@ -54,12 +61,14 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
         const book = books[isbn];
         const { reviews } = book;
         const { username } = req.session.authorization;
+
+        console.log(req.session.authorization, 'authorization obj')
         
         // add the new review
-        reviews.push({
-            "username": username,
-            "quote": newReview
-        });
+        // reviews.push({
+        //     "username": username,
+        //     "quote": newReview
+        // });
     }
 
     //Write your code here
