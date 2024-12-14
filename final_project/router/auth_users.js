@@ -107,15 +107,20 @@ regd_users.delete("/auth/review/:isbn", (req, res) => {
         const { username } = req.session.authorization;
 
         if (!isObjEmpty(reviews)) {
-            // filter out the user reviews
-            const filterOutUserReviews = Object.entries(reviews)
-    
-            // reviews = filterOutUserReviews
+            let newReviewsObject = {};
+
+            for (const [key, value] of Object.entries(reviews)) {
+                if (key !== username) {
+                    newReviewsObject[key] = value;
+                }
+            }
+
+            book.reviews = newReviewsObject;
     
             return res.status(201).json({ 
                 message: `all ${username} reviews have been deleted`, 
                 status: 201, 
-                book: filterOutUserReviews
+                book: book
             });
 
         }
