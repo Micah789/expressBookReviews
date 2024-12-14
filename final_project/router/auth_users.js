@@ -62,18 +62,46 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
         const { reviews } = book;
         const { username } = req.session.authorization;
 
-        console.log(req.session.authorization, 'authorization obj')
+        let message = '';
+
+        // check if there are any reviews 
+        if (isObjEmpty(reviews)) {
+            // add the new review
+            reviews[username] = newReview;    
+
+            message =  "Your review has been added";
+        }
+
+        // loop through the reviews 
+        Object.values(reviews).forEach((review, reviewUsername) => {
+            // check if the review username is the same user thats already posted a review
+            if (reviewUsername === username) {
+                // modify existing review
+                review[username] = newReview;
+
+                message = `${username} existing review has been modified`;
+            }
+        })
         
-        // add the new review
-        // reviews.push({
-        //     "username": username,
-        //     "quote": newReview
-        // });
+        return res.status(201).json({ 
+            message: message, 
+            status: 201, 
+            book: book
+        });
     }
 
-    //Write your code here
-    return res.status(300).json({ message: "Yet to be implemented" });
+    return res.status(404).json({ message: "the isbn does not exist" });
 });
+
+const isObjEmpty = (obj) => {
+    for (const prop in obj) {
+        if (Object.hasOwn(obj, prop)) {
+            return false;
+        }
+    }
+
+    return true;
+};
 
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;
