@@ -50,7 +50,7 @@ regd_users.post("/login", (req, res) => {
     }
 });
 
-// Add a book review
+// Add or modify a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
 
     const { isbn } = req.params;
@@ -67,27 +67,61 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
         // check if there are any reviews 
         if (isObjEmpty(reviews)) {
             // add the new review
-            reviews[username] = newReview;    
+            reviews[username] = newReview;
 
-            message =  "Your review has been added";
+            message = "Your review has been added";
+        } else {
+            // loop through the review keys
+            for (const reviewUsername of Object.keys(reviews)) {
+                // check if the review username is the same user thats already posted a review
+                if (reviewUsername === username) {
+                    // modify existing review
+                    reviews[username] = newReview;
+
+                    message = `${username} existing review has been modified`;
+                } else {
+                    // add your new review
+                    reviews[username] = newReview;
+                    message = "Your review has been added";
+                }
+            }
         }
 
-        // loop through the reviews 
-        Object.values(reviews).forEach((review, reviewUsername) => {
-            // check if the review username is the same user thats already posted a review
-            if (reviewUsername === username) {
-                // modify existing review
-                review[username] = newReview;
-
-                message = `${username} existing review has been modified`;
-            }
-        })
-        
-        return res.status(201).json({ 
-            message: message, 
-            status: 201, 
+        return res.status(201).json({
+            message: message,
+            status: 201,
             book: book
         });
+    }
+
+    return res.status(404).json({ message: "the isbn does not exist" });
+});
+
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+    const { isbn } = req.params;
+
+    if (isbn) {
+        // get the reviews object
+        const book = books[isbn];
+        let { reviews } = book;
+        const { username } = req.session.authorization;
+
+        if (!isObjEmpty(reviews)) {
+            // filter out the user reviews
+            const filterOutUserReviews = Object.entries(reviews)
+    
+            // reviews = filterOutUserReviews
+    
+            return res.status(201).json({ 
+                message: `all ${username} reviews have been deleted`, 
+                status: 201, 
+                book: filterOutUserReviews
+            });
+
+        }
+
+        return res.status(202).json({ message: "there are not reviews to remove" });
+
     }
 
     return res.status(404).json({ message: "the isbn does not exist" });
