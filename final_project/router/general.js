@@ -21,8 +21,23 @@ public_users.post("/register", (req, res) => {
 
 // Get the book list available in the shop
 public_users.get('/', function (req, res) {
+    let getAllBooksPromise = new Promise((resolve, reject) => {
+        if (books) {
+            resolve(books);
+        } else {
+            reject('Unable to register user.');
+        }
+    });
+
+    getAllBooksPromise.then(
+        function(books) {
+            return res.send(JSON.stringify(books, null, 4));
+        },
+        function(error) {
+            return res.status(404).json({ message: error });
+        }
+    );
     //Write your code here
-    return res.send(JSON.stringify(books, null, 4));
 });
 
 public_users.get('/users', function(req, res) {
